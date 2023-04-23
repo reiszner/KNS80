@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Bendix/King KNS80
+    RNAV System with integrated VOR and DME radio
+    Sascha Reißner 2019
+-->
+<PropertyList include="kns80-config.xml">
+
+  <path>kns80.ac</path>
+  <animation>
+    <name>illumination</name>
+    <object-name>annun.allways</object-name>
+    <object-name>annun.vor</object-name>
+    <object-name>annun.par</object-name>
+    <object-name>annun.rnav</object-name>
+    <object-name>annun.enr</object-name>
+    <object-name>annun.apr</object-name>
+    <object-name>annun.hld</object-name>
+    <object-name>annun.ils</object-name>
+
+    <object-name>dme.nm1</object-name>
+    <object-name>dme.nm2</object-name>
+    <object-name>dme.nm3</object-name>
+    <object-name>dme.kt1</object-name>
+    <object-name>dme.kt2</object-name>
+    <object-name>dme.kt3</object-name>
+    <object-name>dme.min1</object-name>
+    <object-name>dme.min2</object-name>
+    <object-name>dme.decimal</object-name>
+    <object-name>dme.invalid</object-name>
+
+    <object-name>digit.wpt1</object-name>
+    <object-name>digit.wpt2</object-name>
+    <object-name>digit.wpt3</object-name>
+    <object-name>digit.wpt4</object-name>
+    <object-name>digit.wpt5</object-name>
+    <object-name>annun.frq</object-name>
+    <object-name>annun.rad</object-name>
+    <object-name>annun.dst</object-name>
+
+    <object-name>digit.use</object-name>
+    <object-name>digit.display</object-name>
+  </animation>
+
+  <animation>
+    <name>dme-on</name>
+    <object-name>dme.nm1</object-name>
+    <object-name>dme.nm2</object-name>
+    <object-name>dme.nm3</object-name>
+    <object-name>dme.kt1</object-name>
+    <object-name>dme.kt2</object-name>
+    <object-name>dme.kt3</object-name>
+    <object-name>dme.min1</object-name>
+    <object-name>dme.min2</object-name>
+    <object-name>dme.decimal</object-name>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>illumination</object-name>
+    <condition>
+      <property>instrumentation/kns80/serviceable</property>
+      <property>instrumentation/kns80/powered</property>
+    </condition>
+  </animation>
+
+<!-- digit display -->
+
+  <animation>
+    <type>select</type>
+    <object-name>digit.display</object-name>
+    <condition>
+      <or>
+        <equals>
+          <property>instrumentation/kns80/display</property>
+          <property>instrumentation/kns80/use</property>
+        </equals>
+        <less-than>
+          <expression>
+            <mod>
+              <product>
+                <dif>
+                  <property>sim/time/elapsed-sec</property>
+                  <property>instrumentation/kns80/display-timer</property>
+                </dif>
+                <value>2</value>
+              </product>
+              <value>2</value>
+            </mod>
+          </expression>
+          <value>1</value>
+        </less-than>
+      </or>
+    </condition>
+  </animation>
+
+<!-- data display -->
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.frq</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/data-mode</property>
+        <value>0</value>
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.rad</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/data-mode</property>
+        <value>1</value>
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.dst</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/data-mode</property>
+        <value>2</value>
+      </equals>
+    </condition>
+  </animation>
+
+<!-- DME display -->
+
+  <animation>
+    <type>select</type>
+    <object-name>dme-on</object-name>
+    <condition>
+      <property alias="../../../params/dme-in-range"/>
+      <not>
+        <and>
+          <greater-than>
+            <property>instrumentation/kns80/nav-mode</property>
+            <value>1</value>
+          </greater-than>
+          <not-equals>
+            <property alias="../../../../params/nav-frequency"/>
+            <property alias="../../../../params/dme-frequency"/>
+          </not-equals>
+        </and>
+      </not>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.invalid</object-name>
+    <condition>
+      <or>
+        <not><property alias="../../../../../params/dme-in-range"/></not>
+        <and>
+          <greater-than>
+            <property>instrumentation/kns80/nav-mode</property>
+            <value>1</value>
+          </greater-than>
+          <not-equals>
+            <property alias="../../../../../../params/nav-frequency"/>
+            <property alias="../../../../../../params/dme-frequency"/>
+          </not-equals>
+        </and>
+      </or>
+    </condition>
+  </animation>
+
+<!-- DME hold -->
+
+    <animation>
+        <type>select</type>
+        <object-name>annun.hld</object-name>
+        <condition>
+            <property>instrumentation/kns80/dme-hold</property>
+        </condition>
+    </animation>
+
+<!-- DME nautical miles -->
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.nm1</object-name>
+    <condition>
+      <greater-than-equals>
+        <property>instrumentation/kns80/dme/indicated-distance-nm</property>
+        <value>9.95</value>
+      </greater-than-equals>
+    </condition>
+  </animation>
+
+<!-- DME knots -->
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.kt1</object-name>
+    <condition>
+      <greater-than-equals>
+        <property>instrumentation/kns80/dme/indicated-ground-speed-kt</property>
+        <value>99.5</value>
+      </greater-than-equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.kt2</object-name>
+    <condition>
+      <greater-than-equals>
+        <property>instrumentation/kns80/dme/indicated-ground-speed-kt</property>
+        <value>9.5</value>
+      </greater-than-equals>
+    </condition>
+  </animation>
+
+<!-- DME minute -->
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.min1</object-name>
+    <condition>
+      <greater-than-equals>
+        <property>instrumentation/kns80/dme/indicated-time-min</property>
+        <value>9.5</value>
+      </greater-than-equals>
+    </condition>
+  </animation>
+
+<!-- WPT distance -->
+
+  <animation>
+    <type>select</type>
+    <object-name>digit.wpt1</object-name>
+    <condition>
+      <or>
+        <equals>
+          <property>instrumentation/kns80/data-mode</property>
+          <value>0</value>
+        </equals>
+        <equals>
+          <property>instrumentation/kns80/data-mode</property>
+          <value>1</value>
+        </equals>
+        <and>
+          <equals>
+            <property>instrumentation/kns80/data-mode</property>
+            <value>2</value>
+          </equals>
+          <greater-than-equals>
+            <property>instrumentation/kns80/displayed-distance</property>
+            <value>99.95</value>
+          </greater-than-equals>
+        </and>
+      </or>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>digit.wpt2</object-name>
+    <condition>
+      <or>
+        <equals>
+          <property>instrumentation/kns80/data-mode</property>
+          <value>0</value>
+        </equals>
+        <equals>
+          <property>instrumentation/kns80/data-mode</property>
+          <value>1</value>
+        </equals>
+        <and>
+          <equals>
+            <property>instrumentation/kns80/data-mode</property>
+            <value>2</value>
+          </equals>
+          <greater-than-equals>
+            <property>instrumentation/kns80/displayed-distance</property>
+            <value>9.95</value>
+          </greater-than-equals>
+        </and>
+      </or>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>digit.wpt5</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/data-mode</property>
+        <value>0</value>
+      </equals>
+    </condition>
+  </animation>
+
+<!-- (R)NAV mode -->
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.vor</object-name>
+    <condition>
+      <less-than>
+        <property>instrumentation/kns80/nav-mode</property>
+        <value>2</value>
+      </less-than>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.par</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/nav-mode</property>
+        <value>1</value>
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.rnav</object-name>
+    <condition>
+      <greater-than>
+        <property>instrumentation/kns80/nav-mode</property>
+        <value>1</value>
+    </greater-than>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.enr</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/nav-mode</property>
+        <value>2</value>
+      </equals>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.apr</object-name>
+    <condition>
+      <equals>
+        <property>instrumentation/kns80/nav-mode</property>
+        <value>3</value>
+      </equals>
+    </condition>
+  </animation>
+
+<!-- ILS -->
+
+  <animation>
+    <type>select</type>
+    <object-name>annun.ils</object-name>
+    <condition>
+      <and>
+        <property alias="../../../../params/nav-in-range"/>
+        <property alias="../../../../params/nav-loc"/>
+      </and>
+    </condition>
+  </animation>
+
+<!-- Waypoint digits -->
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.wpt1</object-name>
+    <property>instrumentation/kns80/displayed-digits</property>
+    <factor>0.001</factor>
+    <step>100</step>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.wpt2</object-name>
+    <property>instrumentation/kns80/displayed-digits</property>
+    <factor>0.01</factor>
+    <step>10</step>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.wpt3</object-name>
+    <property>instrumentation/kns80/displayed-digits</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.wpt4</object-name>
+    <property>instrumentation/kns80/displayed-digits</property>
+    <factor>1</factor>
+    <step>0.1</step>
+    <bias>0.005</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.wpt5</object-name>
+    <property>instrumentation/kns80/displayed-digits</property>
+    <factor>10</factor>
+    <step>0.01</step>
+    <bias>0.005</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+<!-- DME -->
+
+  <animation>
+    <type>select</type>
+    <object-name>dme.decimal</object-name>
+    <condition>
+      <less-than>
+        <property>instrumentation/kns80/dme/indicated-distance-nm</property>
+        <value>99.5</value>
+      </less-than>
+    </condition>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.nm1</object-name>
+    <property>instrumentation/kns80/displayed-indicated-nm</property>
+    <factor>0.001</factor>
+    <step>100</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.nm2</object-name>
+    <property>instrumentation/kns80/displayed-indicated-nm</property>
+    <factor>0.01</factor>
+    <step>10</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.nm3</object-name>
+    <property>instrumentation/kns80/displayed-indicated-nm</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.kt1</object-name>
+    <property>instrumentation/kns80/dme/indicated-ground-speed-kt</property>
+    <factor>0.001</factor>
+    <step>100</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.kt2</object-name>
+    <property>instrumentation/kns80/dme/indicated-ground-speed-kt</property>
+    <factor>0.01</factor>
+    <step>10</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.kt3</object-name>
+    <property>instrumentation/kns80/dme/indicated-ground-speed-kt</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.min1</object-name>
+    <property>instrumentation/kns80/dme/indicated-time-min</property>
+    <factor>0.01</factor>
+    <step>10</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>dme.min2</object-name>
+    <property>instrumentation/kns80/dme/indicated-time-min</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <bias>0.5</bias>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+<!-- used and displayed waypoint -->
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.use</object-name>
+    <property>instrumentation/kns80/use</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>textranslate</type>
+    <object-name>digit.display</object-name>
+    <property>instrumentation/kns80/display</property>
+    <factor>0.1</factor>
+    <step>1</step>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+<!-- hotspots -->
+
+  <animation>
+    <type>rotate</type>
+    <object-name>knob.volume</object-name>
+    <property alias="../../params/nav-volume"/>
+    <factor>300</factor>
+    <center>
+      <x-m>0.0160</x-m>
+      <y-m>0.0387</y-m>
+      <z-m>-0.0290</z-m>
+    </center>
+    <axis>
+      <x>-1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>knob.volume</object-name>
+    <property alias="../../params/nav-audio-btn"/>
+    <factor>0.003</factor>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>knob</type>
+    <object-name>knob.volume</object-name>
+    <action>
+      <binding>
+        <command>property-adjust</command>
+        <property>instrumentation/kns80/event/knob-volume</property>
+        <factor>1</factor>
+      </binding>
+    </action>
+    <shift-action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>instrumentation/kns80/event/knob-volume-pull</property>
+      </binding>
+    </shift-action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.vor</object-name>
+    <property>instrumentation/kns80/event/button-vor</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.vor</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-vor</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-vor</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.rnav</object-name>
+    <property>instrumentation/kns80/event/button-rnav</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.rnav</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-rnav</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-rnav</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.hold</object-name>
+    <property>instrumentation/kns80/event/button-hold</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.hold</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-hold</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-hold</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.use</object-name>
+    <property>instrumentation/kns80/event/button-use</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.use</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-use</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-use</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.dsp</object-name>
+    <property>instrumentation/kns80/event/button-dsp</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.dsp</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-dsp</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-dsp</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>btn.data</object-name>
+    <property>instrumentation/kns80/event/button-data</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>-1</x>
+      <y> 0</y>
+      <z> 0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>pick</type>
+    <object-name>btn.data</object-name>
+    <action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-assign</command>
+        <property>instrumentation/kns80/event/button-data</property>
+        <value>1</value>
+      </binding>
+      <mod-up>
+        <binding>
+          <command>property-assign</command>
+          <property>instrumentation/kns80/event/button-data</property>
+          <value>0</value>
+        </binding>
+      </mod-up>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>knob.outer</object-name>
+    <property>instrumentation/kns80/knob-outer-pos</property>
+    <center>
+      <x-m>0.0290</x-m>
+      <y-m>0.0640</y-m>
+      <z-m>-0.0230</z-m>
+    </center>
+    <axis>
+      <x>-1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>knob</type>
+    <object-name>knob.outer</object-name>
+    <action>
+      <binding>
+        <command>property-adjust</command>
+        <property>instrumentation/kns80/event/knob-outer</property>
+        <factor>1</factor>
+      </binding>
+    </action>
+  </animation>
+
+  <animation>
+    <type>rotate</type>
+    <object-name>knob.inner</object-name>
+    <property>instrumentation/kns80/knob-inner-pos</property>
+    <center>
+      <x-m>0.0290</x-m>
+      <y-m>0.0640</y-m>
+      <z-m>-0.0230</z-m>
+    </center>
+    <axis>
+      <x>-1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>translate</type>
+    <object-name>knob.inner</object-name>
+    <property>instrumentation/kns80/select-pulled</property>
+    <factor>0.003</factor>
+    <axis>
+      <x>1</x>
+      <y>0</y>
+      <z>0</z>
+    </axis>
+  </animation>
+
+  <animation>
+    <type>knob</type>
+    <object-name>knob.inner</object-name>
+    <action>
+      <binding>
+        <command>property-adjust</command>
+        <property>instrumentation/kns80/event/knob-inner</property>
+        <factor>1</factor>
+      </binding>
+    </action>
+    <shift-action>
+      <button>0</button>
+      <repeatable>false</repeatable>
+      <binding>
+        <command>property-toggle</command>
+        <property>instrumentation/kns80/event/knob-inner-pull</property>
+      </binding>
+    </shift-action>
+  </animation>
+
+<!--
+    the buttons are made from translucent white rubber or plastic with backlight
+    control the brightness with instrument lights
+-->
+  <animation>
+    <type>material</type>
+    <object-name>btn.vor</object-name>
+    <object-name>btn.rnav</object-name>
+    <object-name>btn.hold</object-name>
+    <object-name>btn.use</object-name>
+    <object-name>btn.dsp</object-name>
+    <object-name>btn.data</object-name>
+    <emission>
+      <factor-prop>systems/electrical/outputs/instrument-lights-norm</factor-prop>
+      <red>   0.5</red>
+      <green> 0.4</green>
+      <blue>  0.3</blue>
+    </emission>
+  </animation>
+
+<!--
+    the pasive parts without emission
+    without light-map, control ambient with instrument lights
+-->
+  <animation>
+    <type>material</type>
+    <object-name>bezel</object-name>
+    <object-name>knob.inner</object-name>
+    <object-name>knob.outer</object-name>
+    <object-name>knob.volume</object-name>
+    <emission>
+      <factor-prop>systems/electrical/outputs/instrument-lights-norm</factor-prop>
+      <red>   0.05</red>
+      <green> 0.04</green>
+      <blue>  0.03</blue>
+    </emission>
+  </animation>
+
+<!-- working for Rembrandt -->
+
+  <effect>
+    <inherits-from>Models/Effects/Glass/glass</inherits-from>
+    <object-name>glass</object-name>
+  </effect>
+
+</PropertyList>
