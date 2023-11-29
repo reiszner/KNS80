@@ -1,2 +1,3 @@
-Bendix/King KNS 80 for FlightGear Flightsimulator (FGFS)
---------------------------------------------------------
+# KNS80
+
+Bendix/King KNS80 (RNAV / Areal Navigation Radio) for FlightGear Flight Simulation (FGFS)

@@ -12,15 +12,48 @@ var kns80_outer       = props.globals.initNode("instrumentation/kns80/event/knob
 var kns80_inner       = props.globals.initNode("instrumentation/kns80/event/knob-inner",       0, "INT");
 var kns80_inner_pull  = props.globals.initNode("instrumentation/kns80/event/knob-inner-pull",  0, "BOOL");
 
+#var dme_distance      = props.globals.getNode("instrumentation/kns80/nav/nav-distance-nm",0);
 var dme_distance      = props.globals.getNode(config.getValue("params/dme-indicated-distance-nm"),0);
 
 setlistener(dme_distance, func(dist) {
-    if (dist.getValue() > 0.0) {
-        var dme_dist      = dist.getValue();
+
+    if (getprop("instrumentation/kns80/nav/in-range")) {
+        if (getprop("instrumentation/kns80/nav-mode") > 1) {
+
+            var nav_heading_rad    = (getprop(config.getValue("params/nav-heading-deg")) * math.pi) / 180.0;
+            var aircraft_station_x = math.sin(nav_heading_rad) * getprop(config.getValue("params/dme-indicated-distance-nm"));
+            var aircraft_station_y = math.cos(nav_heading_rad) * getprop(config.getValue("params/dme-indicated-distance-nm"));
+
+            var angle_delta_rad = ((getprop("instrumentation/kns80/used-radial") + getprop("instrumentation/kns80/nav/internal/station-declination")) * math.pi) / 180.0;
+            var station_waypoint_x = math.sin(angle_delta_rad) * getprop("instrumentation/kns80/used-distance");
+            var station_waypoint_y = math.cos(angle_delta_rad) * getprop("instrumentation/kns80/used-distance");
+
+            var aircraft_waypoint_x = aircraft_station_x + station_waypoint_x;
+            var aircraft_waypoint_y = aircraft_station_y + station_waypoint_y;
+
+            setprop("instrumentation/kns80/nav/internal/aircraft-station-x", aircraft_station_x);
+            setprop("instrumentation/kns80/nav/internal/aircraft-station-y", aircraft_station_y);
+            setprop("instrumentation/kns80/nav/internal/station-waypoint-x", station_waypoint_x);
+            setprop("instrumentation/kns80/nav/internal/station-waypoint-y", station_waypoint_y);
+            setprop("instrumentation/kns80/nav/internal/aircraft-waypoint-x", aircraft_waypoint_x);
+            setprop("instrumentation/kns80/nav/internal/aircraft-waypoint-y", aircraft_waypoint_y);
+            setprop("instrumentation/kns80/nav/nav-distance-nm",
+                math.sqrt(aircraft_waypoint_x * aircraft_waypoint_x + aircraft_waypoint_y * aircraft_waypoint_y)
+            );
+        } else {
+            setprop("instrumentation/kns80/nav/nav-distance-nm", getprop(config.getValue("/params/dme-indicated-distance-nm")));
+        }
+    }
+
+    if (getprop("instrumentation/kns80/nav/nav-distance-nm") > 0.0) {
+        var dme_dist      = getprop("instrumentation/kns80/nav/nav-distance-nm");
         var dme_dist_last = getprop("instrumentation/kns80/dme/last-distance-nm");
         var dme_time      = getprop("sim/time/elapsed-sec");
         var dme_time_last = getprop("instrumentation/kns80/dme/last-time");
-#        printf("Dist: %f / Last: %f / Time: %f / Last: %f", dme_dist, dme_dist_last, dme_time, dme_time_last);
+
+        var dme_time_delta= dme_time - dme_time_last;
+
+#        printf("Dist: %f / Last: %f / Time: %f / Last: %f / Delta: %f", dme_dist, dme_dist_last, dme_time, dme_time_last, dme_time_delta);
         var factor        = abs(dme_dist - dme_dist_last) / (dme_time - dme_time_last);
         var speed         = factor * 3600;
         var minute        = dme_dist / (factor * 60);
