@@ -59,10 +59,12 @@ Include the KNS 80 in your aircraft:
 
 - add the file 'kns80-proprules.xml' as property rule under '<sim> … <systems>' in your set-file
 
-- include the file 'kns80-props.xml' under '<instrumentation>' in your set-file
+- include the file 'kns80-props.xml' under '<instrumentation>' in your set-file like:
+
+        <kns80 include="../relative/path/to/kns80-props.xml">
 
 - copy the file 'kns80.nas' into your Nasal directory and add it in your set-file
-    under <nasal> like:
+    under '<nasal>' in your set-file like:
 
         <kns80>
             <file>Nasal/kns80.nas</file>
